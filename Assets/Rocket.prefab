@@ -1061,7 +1061,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dbe49d5d3d6c46feafc549a97957438, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationSpeed: 200
+  rotationSpeed: 250
   thrustSpeed: 300
   waitTime: 1
   thrustAudio: {fileID: 8300000, guid: b02a76aba466644c1ad024d41c600898, type: 3}

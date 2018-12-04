@@ -13,9 +13,10 @@ public class Rocket : MonoBehaviour {
     Rigidbody rigidBody;
     AudioSource audioSource;
     private RigidbodyConstraints rigidbodyConstraints;
-    [SerializeField] float rotationSpeed = 200;
-    [SerializeField] float thrustSpeed = 4;
+    [SerializeField] float rotationSpeed = 250;
+    [SerializeField] float thrustSpeed = 300;
     [SerializeField] float waitTime = 1;
+
     [SerializeField] AudioClip thrustAudio;
     [SerializeField] AudioClip explosionAudio;
     [SerializeField] AudioClip successAudio;
@@ -70,7 +71,15 @@ public class Rocket : MonoBehaviour {
         audioSource.Stop();
         audioSource.PlayOneShot(successAudio);
         successParticles.Play();
-        Invoke("LoadNextScene", waitTime);
+        if(SceneManager.GetActiveScene().buildIndex != 3)
+        {
+            Invoke("LoadNextScene", waitTime);
+        }
+        else
+        {
+            Invoke("Restart", waitTime);
+        }
+
     }
 
     private void StartDeathSequence()
@@ -80,7 +89,7 @@ public class Rocket : MonoBehaviour {
         thrustParticles.Stop();
         audioSource.PlayOneShot(explosionAudio);
         explosionParticles.Play();
-        Invoke("Restart", waitTime);
+        Invoke("ReloadScene", waitTime);
     }
 
     private void Restart()
@@ -91,8 +100,13 @@ public class Rocket : MonoBehaviour {
 
     private void LoadNextScene()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         state = State.Alive;
+    }
+
+    private void ReloadScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void Rotate()

@@ -20,6 +20,7 @@ public class Oscillator : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (period <= Mathf.Epsilon) return;
         float cycles = Time.time / period;
         float rawSinWave = Mathf.Sin(2 * Mathf.PI * cycles);
         movementFactor = rawSinWave / 2f + 0.5f;
