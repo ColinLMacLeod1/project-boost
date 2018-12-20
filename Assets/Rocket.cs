@@ -14,7 +14,7 @@ public class Rocket : MonoBehaviour {
     AudioSource audioSource;
     private RigidbodyConstraints rigidbodyConstraints;
     [SerializeField] float rotationSpeed = 250;
-    [SerializeField] float thrustSpeed = 300;
+    [SerializeField] float thrustSpeed = 10000;
     [SerializeField] float waitTime = 1;
 
     [SerializeField] AudioClip thrustAudio;
@@ -24,6 +24,9 @@ public class Rocket : MonoBehaviour {
     [SerializeField] ParticleSystem thrustParticles;
     [SerializeField] ParticleSystem explosionParticles;
     [SerializeField] ParticleSystem successParticles;
+
+    //Dev
+    [SerializeField] bool collisions = true;
 
     // Use this for initialization
     void Start () {
@@ -35,26 +38,55 @@ public class Rocket : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(state == State.Alive) handleInput();  //TODO stop audio
+        if(state == State.Alive) HandleInput();
     }
 
-    private void handleInput()
+    private void HandleInput()
     {
         Thrust();
         Rotate();
+        if(Debug.isDebugBuild) RespondToDebugKeys();
+    }
+
+    private void Thrust()
+    {
+        if (Input.GetKey(KeyCode.Space))
+        {
+            rigidBody.AddRelativeForce(Vector3.up * thrustSpeed * Time.deltaTime);
+            if (!audioSource.isPlaying) audioSource.PlayOneShot(thrustAudio);
+            thrustParticles.Play();
+        }
+        else
+        {
+            audioSource.Stop();
+            thrustParticles.Stop();
+
+        }
+    }
+
+    private void Rotate()
+    {
+
+        float rotationThisFrame = Time.deltaTime * rotationSpeed;
+        if (Input.GetKey(KeyCode.A))
+        {
+            RotateManually(rotationThisFrame);
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
+            RotateManually(-rotationThisFrame);
+        }
+        rigidBody.constraints = rigidbodyConstraints;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (state != State.Alive) return;
-        switch(collision.gameObject.tag)
+        if (state != State.Alive || !collisions) return;
+        switch (collision.gameObject.tag)
         {
             case "Friendly":
                 state = State.Alive;
                 print("OK");
-                break;
-            case "Fuel":
-                print("Fuel");
                 break;
             case "Finish":
                 StartSuccessSequence();
@@ -65,13 +97,21 @@ public class Rocket : MonoBehaviour {
         }
     }
 
+
+    private void RespondToDebugKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.C)) collisions = !collisions;
+        else if (Input.GetKeyDown(KeyCode.L)) StartSuccessSequence();
+    }
+
     private void StartSuccessSequence()
     {
         state = State.Transitioning;
         audioSource.Stop();
         audioSource.PlayOneShot(successAudio);
         successParticles.Play();
-        if(SceneManager.GetActiveScene().buildIndex != 3)
+        print(SceneManager.sceneCountInBuildSettings);
+        if(SceneManager.GetActiveScene().buildIndex < SceneManager.sceneCountInBuildSettings-1)
         {
             Invoke("LoadNextScene", waitTime);
         }
@@ -109,35 +149,12 @@ public class Rocket : MonoBehaviour {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    private void Rotate()
+    private void RotateManually(float rotationThisFrame)
     {
         rigidBody.freezeRotation = true; // take manual control
-        float rotationThisFrame = Time.deltaTime * rotationSpeed;
-        if (Input.GetKey(KeyCode.A))
-        {
-            transform.Rotate(Vector3.forward* rotationThisFrame);
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            transform.Rotate(-Vector3.forward* rotationThisFrame);
-        }
+        transform.Rotate(Vector3.forward * rotationThisFrame);
         rigidBody.freezeRotation = false; // release manual control
-        rigidBody.constraints = rigidbodyConstraints;
     }
 
-    private void Thrust()
-    {
-        if (Input.GetKey(KeyCode.Space))
-        {
-            rigidBody.AddRelativeForce(Vector3.up * thrustSpeed * Time.deltaTime);
-            if (!audioSource.isPlaying) audioSource.PlayOneShot(thrustAudio);
-            thrustParticles.Play();
-        }
-        else
-        {
-            audioSource.Stop();
-            thrustParticles.Stop();
 
-        }
-    }
 }

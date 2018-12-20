@@ -1070,6 +1070,7 @@ MonoBehaviour:
   thrustParticles: {fileID: 198950733711659480}
   explosionParticles: {fileID: 198055704312907546}
   successParticles: {fileID: 198194765348800832}
+  collisions: 1
 --- !u!135 &135102896867638308
 SphereCollider:
   m_ObjectHideFlags: 1
